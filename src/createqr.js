@@ -3,7 +3,7 @@ const path = require("path");
 const QRCode = require('qrcode');
 
 /** QRの画像を生成 */
-const createQr = async () => {
+const createVisitorQr = async () => {
   // ファイル読込
   const list = [];
   for (const date of ["12月26日", "12月27日", "12月28日", "12月29日", "12月30日", "12月31日"]) {
@@ -47,20 +47,45 @@ const createQr = async () => {
       continue;
     }
 
-    const text = item.code;
-    const option = {
-      type: "png",
-      errorCorrectionLevel: "H"
-    };
-
-    QRCode.toFile(qrpath, text, option, function (err) {
-      if (err) {
-        console.log(`${item.mail} でエラー`);
-        console.error(err);
-      }
-    });
+    createQr(qrpath, item.code, item.mail);
   }
 }
 
+const createQr = (qrpath, code, mail) => {
+  const option = {
+    type: "png",
+    errorCorrectionLevel: "H"
+  };
+
+  QRCode.toFile(qrpath, code, option, function (err) {
+    if (err) {
+      console.log(`${mail} でエラー`);
+      console.error(err);
+    }
+  });
+}
+
+const createGuestQr = () => {
+  const filename = `data/guest.json`;
+  let list = JSON.parse(fs.readFileSync(filename).toString());
+
+  list = list.filter(item => item.mail);
+
+  for (const item of list) {
+    console.log(`${item.name} ${item.mail} ${item.code}`);
+    const qrpath = `data/image/guest/${item.code}.png`;
+    if (!fs.existsSync(path.dirname(qrpath))) {
+      fs.mkdirpSync(path.dirname(qrpath));
+    }
+    if (fs.existsSync(qrpath)) {
+      console.warn(`生成済み: ${qrpath}`);
+      continue;
+    }
+    createQr(qrpath, item.code, item.mail);
+  }
+
+}
+
 // QR画像を出力
-createQr();
+createVisitorQr();
+createGuestQr();

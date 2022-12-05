@@ -14,10 +14,10 @@ const transporter = nodemailer.createTransport({
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 
 /** メール送る */
-const sendMail = async (mail, date, filepath, code, dryrun) => {
-  const subject = `RTA in Japan Winter 2022 入場コード(${date})`;
+const sendMail = async (mail, filepath, code, dryrun) => {
+  const subject = `RTA in Japan Winter 2022 入場コード`;
 
-  const text = `RTA in Japan Winter 2022 ${date}の入場が当選しました。
+  const text = `RTA in Japan Winter 2022 関係者様向け
 
   入場に必要なQRコードを送付いたします。
   新型コロナウイルスのワクチン接種証明書と併せて、会場の受付に提示してください。
@@ -30,8 +30,6 @@ const sendMail = async (mail, date, filepath, code, dryrun) => {
 - 入場用リンクの譲渡は厳禁です。
 - 入場には新型コロナウイルスワクチンの接種完了が証明できるものが必要です。PCR検査陰性などは代わりになりません。
 - 入場時に無料でN95マスクを配布します。特別な理由がない限り着用をお願いします。
-- 会場に滞在可能な時間は当選日の00:00～23:59となります。日を跨いで滞在する場合は、翌日のコードによる再認証が必要です。
-- 入場登録フォームに記載した通り、同時に入れる人数は決まっており、必ず会場に入れるとは限りません。
 - 会場で荷物は預かれません。持ち物は全て自己責任で管理してください。盗難などの責任も取れません。
 - 会場で食事をできるところはありません。
 - 会場に入った時点で、配信や撮影のカメラに映る可能性が常にありますのでご承知ください。
@@ -69,27 +67,24 @@ RTA in Japan
 const main = async (dryrun) => {
   if (dryrun) console.log("★dryrun mode!★")
 
-  for (const date of ["12月26日", "12月27日", "12月28日", "12月29日", "12月30日", "12月31日"]) {
-    const list = JSON.parse(fs.readFileSync(`data/mail_${date}.json`).toString());
-    console.log(`================= ${date} ==========================`);
+  const list = JSON.parse(fs.readFileSync(`data/guest.json`).toString()).filter(item => item.mail);
 
-    for (const item of list) {
-      console.log(`${item.mail} ${date} ${item.code}`);
+  for (const item of list) {
+    console.log(`${item.mail} ${item.name} ${item.code}`);
 
-      const qrpath = `data/image/${date}/${item.code}.png`;
-      if (!fs.existsSync(qrpath)) {
-        console.log(`${qrpath}がありません`);
-      } else {
-        try {
-          await sendMail(item.mail, date, qrpath, item.code, dryrun);
-        } catch (e) {
-          console.log(`${mail} でエラーが起きた`);
-          console.error(e);
-        }
-
-        // 1秒間あたりの送信リミットに引っかからないようにsleep入れる
-        await sleep(100);
+    const qrpath = `data/image/guest/${item.code}.png`;
+    if (!fs.existsSync(qrpath)) {
+      console.log(`${qrpath}がありません`);
+    } else {
+      try {
+        await sendMail(item.mail, qrpath, item.code, dryrun);
+      } catch (e) {
+        console.log(`${item.mail} でエラーが起きた`);
+        console.error(e);
       }
+
+      // 1秒間あたりの送信リミットに引っかからないようにsleep入れる
+      await sleep(100);
     }
   }
 }

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "qr": "node src/createqr.js",
-    "send": "node src/sendmail.js"
+    "send": "node src/sendmail.js",
+    "guest": "node src/sendmail_guest.js"
   },
   "author": "",
   "license": "ISC",
