@@ -6,10 +6,15 @@ const QRCode = require('qrcode');
 const createVisitorQr = async () => {
   // ファイル読込
   const list = [];
-  for (const date of ["12月26日", "12月27日", "12月28日", "12月29日", "12月30日", "12月31日"]) {
-    const filename = `mail_${date}`
-    const json = JSON.parse(fs.readFileSync("data/" + filename + ".json").toString());
-    console.log(`${filename} は ${json.length} 件のデータ`);
+  for (const date of ["8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
+    const jsonname = `data/mail_${date}.json`;
+    if (!fs.existsSync(jsonname)) {
+      console.error(`JSON file is not found. filename=${jsonname}`);
+      continue;
+    }
+
+    const json = JSON.parse(fs.readFileSync(jsonname).toString());
+    console.log(`${jsonname} は ${json.length} 件のデータ`);
 
     // データチェック
     for (const item of json) {

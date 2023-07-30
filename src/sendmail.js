@@ -15,31 +15,32 @@ const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 
 /** メール送る */
 const sendMail = async (mail, date, filepath, code, dryrun) => {
-  const subject = `RTA in Japan Winter 2022 入場コード(${date})`;
+  const subject = `RTA in Japan Summer 2023 入場コード(${date})`;
 
-  const text = `RTA in Japan Winter 2022 ${date}の入場が当選しました。
+  const text = `RTA in Japan Summer 2023 ${date}の入場が当選しました。
 
-  入場に必要なQRコードを送付いたします。
-  新型コロナウイルスのワクチン接種証明書と併せて、会場の受付に提示してください。
-  
-  添付画像が表示できない場合は以下のURLにアクセスしてください。
-  https://rtain.jp/code/?data=${code}
+入場に必要なQRコードを送付いたします。
+新型コロナウイルスのワクチン接種証明書と併せて、会場の受付に提示してください。
 
+添付画像が表示できない場合は以下のURLにアクセスしてください。
+https://rtain.jp/code/?data=${code}
 
 また、事前に以下をご確認の上、ご来場頂きますようお願い致します。
+- この入場コードは1名のみが利用可能で、介助者などの自身の生活をサポートするための人を除いて同伴はできません。
 - 入場用リンクの譲渡は厳禁です。
 - 入場には新型コロナウイルスワクチンの接種完了が証明できるものが必要です。PCR検査陰性などは代わりになりません。
-- 入場時に無料でN95マスクを配布します。特別な理由がない限り着用をお願いします。
+- 会場では、N95/KF94/KN95に相当するマスクを常に着用する必要があります。特別な理由がない限り会場受付で配布するマスクを着用してください。
 - 会場に滞在可能な時間は当選日の00:00～23:59となります。日を跨いで滞在する場合は、翌日のコードによる再認証が必要です。
+- 18歳未満は22時以降の来場禁止、16歳未満は18時以降の来場禁止（保護者同伴なら22時まで可）となっています。
 - 入場登録フォームに記載した通り、同時に入れる人数は決まっており、必ず会場に入れるとは限りません。
+- 入場に制限を掛けるときは速やかに公式TwitterとDiscordで告知いたしますが、その際に会場の外で列を作らないでください。
 - 会場で荷物は預かれません。持ち物は全て自己責任で管理してください。盗難などの責任も取れません。
 - 会場で食事をできるところはありません。
-- 会場に入った時点で、配信や撮影のカメラに映る可能性が常にありますのでご承知ください。
+- 会場に入った時点で、配信や撮影のカメラに映る可能性が常にありますのでご承知ください。参考: https://rtain.jp/photos/ https://www.youtube.com/playlist?list=PLFvJYuQufMw4pYp1Aru3z1-G69HWUg6tT
 - ゴミは各自で持ち帰って下さい。
 - 酒類の持ち込みおよび酒気帯びで入場はできません。
-- 車椅子スペースなど会場内で特別な対応を希望される方は、できるだけ事前に info@rtain.jp までご連絡ください。
+- 車椅子スペースなどの対応を希望される方は、事前に info@rtain.jp までご連絡いただけるとスムーズです。
 - 会場周辺での徹夜待機などは近所の迷惑になりますので絶対にやめてください。
-- その他の注意事項は https://rtain.jp/audience/ をご確認ください。
 
 ------------------
 RTA in Japan
@@ -69,8 +70,13 @@ RTA in Japan
 const main = async (dryrun) => {
   if (dryrun) console.log("★dryrun mode!★")
 
-  for (const date of ["12月26日", "12月27日", "12月28日", "12月29日", "12月30日", "12月31日"]) {
-    const list = JSON.parse(fs.readFileSync(`data/mail_${date}.json`).toString());
+  for (const date of ["8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
+    const jsonname = `data/mail_${date}.json`;
+    if (!fs.existsSync(jsonname)) {
+      console.error(`JSON file is not found. filename=${jsonname}`);
+      continue;
+    }
+    const list = JSON.parse(fs.readFileSync(jsonname).toString());
     console.log(`================= ${date} ==========================`);
 
     for (const item of list) {
