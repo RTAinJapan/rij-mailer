@@ -94,7 +94,7 @@ const main = async (dryrun) => {
         }
 
         // 1秒間あたりの送信リミットに引っかからないようにsleep入れる
-        await sleep(100);
+        if (!dryrun) await sleep(100);
       }
     }
   }
