@@ -35,10 +35,10 @@ const sendMail = async (mail, date, filepath, code, dryrun) => {
 
   fs.appendFileSync("data/senddump.log", JSON.stringify(sendObj, null, "  ") + ",\n");
   if (!dryrun) {
-    // const result = await transporter.sendMail(sendObj);
-    // const msg = `${mail} ${result.messageId}`;
-    // console.log(msg);
-    // fs.appendFileSync("data/senddump.log", msg + "\n");
+    const result = await transporter.sendMail(sendObj);
+    const msg = `${mail} ${result.messageId}`;
+    console.log(msg);
+    fs.appendFileSync("data/senddump.log", msg + "\n");
   }
 }
 
