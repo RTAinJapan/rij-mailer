@@ -94,5 +94,5 @@ const main = async (dryrun) => {
 }
 
 // メール送信
-const dryrun = false;
+const dryrun = true;
 main(dryrun);

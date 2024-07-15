@@ -7,7 +7,8 @@ const { parse } = require('csv-parse/sync');
 const createVisitorQr = async () => {
   // ファイル読込
   const list = [];
-  for (const date of ["8月9日", "8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
+  for (const date of ["0月0日"]) {
+    // for (const date of ["8月9日", "8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
     const filename = `data/${date}.csv`;
     if (!fs.existsSync(filename)) {
       console.error(`file is not found. filename=${filename}`);
