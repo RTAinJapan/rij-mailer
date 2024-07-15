@@ -1,49 +1,49 @@
 const fs = require('fs-extra');
 const path = require("path");
 const QRCode = require('qrcode');
+const { parse } = require('csv-parse/sync');
 
 /** QRの画像を生成 */
 const createVisitorQr = async () => {
   // ファイル読込
   const list = [];
-  for (const date of ["8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
-    const jsonname = `data/mail_${date}.json`;
-    if (!fs.existsSync(jsonname)) {
-      console.error(`JSON file is not found. filename=${jsonname}`);
+  for (const date of ["8月9日", "8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
+    const filename = `data/${date}.csv`;
+    if (!fs.existsSync(filename)) {
+      console.error(`file is not found. filename=${filename}`);
       continue;
     }
 
-    const json = JSON.parse(fs.readFileSync(jsonname).toString());
-    console.log(`${jsonname} は ${json.length} 件のデータ`);
+    const data = parse(fs.readFileSync(filename));
+    console.log(`${filename} は ${data.length} 件のデータ`);
 
     // データチェック
-    for (const item of json) {
-      if (!item.day) {
-        console.warn(item);
-        return;
-      }
-      if (!item.mail) {
-        console.warn(item);
-        return;
-      }
-      if (!item.name) {
-        console.warn(item);
-        return;
-      }
-      if (!item.code) {
-        console.warn(item);
-        return;
-      }
-    }
+    for (const item of data) {
+      const mail = item[0];
+      const code = item[1];
 
-    list.push(...json);
+      if (!mail || !mail.includes("@")) {
+        console.warn(item);
+        return;
+      }
+      if (!code) {
+        console.warn(item);
+        return;
+      }
+
+      list.push({
+        mail,
+        code,
+        date,
+      });
+    }
   }
   console.log(`計 ${list.length} 件のQRを出力`);
   console.log(list[0]);
 
   // QR作成
   for (const item of list) {
-    const qrpath = `data/image/${item.day}/${item.code}.png`;
+    const qrpath = `data/image/${item.date}/${item.code}.png`;
     if (!fs.existsSync(path.dirname(qrpath))) {
       fs.mkdirpSync(path.dirname(qrpath));
     }
@@ -93,4 +93,4 @@ const createGuestQr = () => {
 
 // QR画像を出力
 createVisitorQr();
-createGuestQr();
+// createGuestQr();
