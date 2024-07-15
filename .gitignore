@@ -106,3 +106,4 @@ dist
 data/*.json
 *.png
 data/*.csv
+data/*.txt
