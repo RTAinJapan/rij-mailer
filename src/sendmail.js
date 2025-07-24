@@ -5,6 +5,10 @@ const nodemailer = require('nodemailer');
 const { parse } = require('csv-parse/sync');
 
 
+const DRY_RUN = true;
+const DATE_LIST = ["0月0日"];
+// const DATE_LIST = ["8月9日", "8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"];
+
 // .envで指定
 // process.env.AWS_ACCESS_KEY_ID = "";
 // process.env.AWS_SECRET_ACCESS_KEY = "";
@@ -45,8 +49,8 @@ const sendMail = async (mail, date, filepath, code, dryrun) => {
 const main = async (dryrun) => {
   if (dryrun) console.log("★dryrun mode!★")
 
-  for (const date of ["0月0日"]) {
-    // for (const date of ["8月9日", "8月10日", "8月11日", "8月12日", "8月13日", "8月14日", "8月15日"]) {
+  for (const date of DATE_LIST) {
+    // for (const date of ) {
     const filename = `data/${date}.csv`;
     if (!fs.existsSync(filename)) {
       console.error(`file is not found. filename=${filename}`);
@@ -80,5 +84,4 @@ const main = async (dryrun) => {
 }
 
 // メール送信
-const dryrun = true;
-main(dryrun);
+main(DRY_RUN);

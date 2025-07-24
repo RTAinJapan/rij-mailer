@@ -72,14 +72,23 @@ const createQr = (qrpath, code, mail) => {
 }
 
 const createGuestQr = () => {
-  const filename = `data/guest.json`;
-  let list = JSON.parse(fs.readFileSync(filename).toString());
+  const filename = `data/guest.csv`;
 
-  list = list.filter(item => item.mail);
+  if (!fs.existsSync(filename)) {
+    console.error(`file is not found. filename=${filename}`);
+    return;
+  }
 
-  for (const item of list) {
-    console.log(`${item.name} ${item.mail} ${item.code}`);
-    const qrpath = `data/image/guest/${item.code}.png`;
+  const data = parse(fs.readFileSync(filename));
+
+  for (const item of data) {
+    const mail = item[0];
+    const start_at = item[1];
+    const end_at = item[2];
+    const code = item[3];
+
+    console.log(`${mail} ${start_at} ${end_at} ${code}`);
+    const qrpath = `data/image/guest/${code}.png`;
     if (!fs.existsSync(path.dirname(qrpath))) {
       fs.mkdirpSync(path.dirname(qrpath));
     }
@@ -87,11 +96,11 @@ const createGuestQr = () => {
       console.warn(`生成済み: ${qrpath}`);
       continue;
     }
-    createQr(qrpath, item.code, item.mail);
+    createQr(qrpath, code, mail);
   }
 
 }
 
 // QR画像を出力
 createVisitorQr();
-// createGuestQr();
+createGuestQr();

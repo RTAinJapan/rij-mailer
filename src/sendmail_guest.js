@@ -2,7 +2,9 @@ require('dotenv').config();
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const nodemailer = require('nodemailer');
+const { parse } = require('csv-parse/sync');
 
+const DRY_RUN = true;
 
 // .envで指定
 // process.env.AWS_ACCESS_KEY_ID = "";
@@ -14,38 +16,9 @@ const transporter = nodemailer.createTransport({
 const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
 
 /** メール送る */
-const sendMail = async (mail, filepath, code, dryrun) => {
-  const subject = `RTA in Japan Summer 2023 入場コード`;
-
-  const text = `RTA in Japan Summer 2023 関係者様向け
-
-  入場に必要なQRコードを送付いたします。
-  新型コロナウイルスのワクチン接種証明書と併せて、会場の受付に提示してください。
-  
-  添付画像が表示できない場合は以下のURLにアクセスしてください。
-  https://rtain.jp/code/?data=${code}
-
-
-また、事前に以下をご確認の上、ご来場頂きますようお願い致します。
-- この入場コードは1名のみが利用可能で、介助者などの自身の生活をサポートするための人を除いて同伴はできません。
-- 入場用リンクの譲渡は厳禁です。
-- 入場には新型コロナウイルスワクチンの接種完了が証明できるものが必要です。PCR検査陰性などは代わりになりません。
-- 会場では、N95/KF94/KN95に相当するマスクを常に着用する必要があります。特別な理由がない限り会場受付で配布するマスクを着用してください。
-- 会場に滞在可能な時間は当選日の00:00～23:59となります。日を跨いで滞在する場合は、翌日のコードによる再認証が必要です。
-- 18歳未満は22時以降の来場禁止、16歳未満は18時以降の来場禁止（保護者同伴なら22時まで可）となっています。
-- 入場登録フォームに記載した通り、同時に入れる人数は決まっており、必ず会場に入れるとは限りません。
-- 入場に制限を掛けるときは速やかに公式TwitterとDiscordで告知いたしますが、その際に会場の外で列を作らないでください。
-- 会場で荷物は預かれません。持ち物は全て自己責任で管理してください。盗難などの責任も取れません。
-- 会場で食事をできるところはありません。
-- 会場に入った時点で、配信や撮影のカメラに映る可能性が常にありますのでご承知ください。参考: https://rtain.jp/photos/ https://www.youtube.com/playlist?list=PLFvJYuQufMw4pYp1Aru3z1-G69HWUg6tT
-- ゴミは各自で持ち帰って下さい。
-- 酒類の持ち込みおよび酒気帯びで入場はできません。
-- 車椅子スペースなどの対応を希望される方は、事前に info@rtain.jp までご連絡いただけるとスムーズです。
-- 会場周辺での徹夜待機などは近所の迷惑になりますので絶対にやめてください。
-
-------------------
-RTA in Japan
-`;
+const sendMail = async (mail, filepath, code, start_at, end_at, dryrun) => {
+  const subject = fs.readFileSync("data/subject.txt").toString();
+  const text = fs.readFileSync("data/text.txt").toString().replace("{code}", code).replace("{start_at}", start_at).replace("{end_at}", end_at);
 
   const sendObj = {
     from: 'info@rtain.jp',
@@ -71,19 +44,31 @@ RTA in Japan
 const main = async (dryrun) => {
   if (dryrun) console.log("★dryrun mode!★")
 
-  const list = JSON.parse(fs.readFileSync(`data/guest.json`).toString()).filter(item => item.mail);
+  const filename = `data/guest.csv`;
 
-  for (const item of list) {
-    console.log(`${item.mail} ${item.name} ${item.code}`);
+  if (!fs.existsSync(filename)) {
+    console.error(`file is not found. filename=${filename}`);
+    return;
+  }
 
-    const qrpath = `data/image/guest/${item.code}.png`;
+  const data = parse(fs.readFileSync(filename));
+
+  for (const item of data) {
+    const mail = item[0];
+    const start_at = item[1];
+    const end_at = item[2];
+    const code = item[3];
+
+    console.log(`${mail} ${start_at} ${end_at} ${code}`);
+
+    const qrpath = `data/image/guest/${code}.png`;
     if (!fs.existsSync(qrpath)) {
       console.log(`${qrpath}がありません`);
     } else {
       try {
-        await sendMail(item.mail, qrpath, item.code, dryrun);
+        await sendMail(mail, qrpath, code, start_at, end_at, dryrun);
       } catch (e) {
-        console.log(`${item.mail} でエラーが起きた`);
+        console.log(`${mail} でエラーが起きた`);
         console.error(e);
       }
 
@@ -94,5 +79,4 @@ const main = async (dryrun) => {
 }
 
 // メール送信
-const dryrun = true;
-main(dryrun);
+main(DRY_RUN);
